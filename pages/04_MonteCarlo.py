@@ -2,149 +2,146 @@ import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
 
-# ============================================
-# Material UI 套用
-# ============================================
+st.set_page_config(page_title="Monte Carlo 模擬", layout="wide")
+st.title("🎲 Monte Carlo 風險模擬")
+
+# ============================================================
+# 📘 本章目標與工程用途
+# ============================================================
 st.markdown("""
-<style>
-.material-card {
-    background-color: var(--background-color);
-    padding: 1.6rem;
-    border-radius: 12px;
-    border: 1px solid var(--primary-color);
-    box-shadow: 0 4px 10px var(--shadow-color);
-    margin-bottom: 1.5rem;
-}
-.material-title {
-    font-size: 1.6rem; 
-    font-weight: 700; 
-    color: var(--primary-color);
-    margin-bottom: 0.5rem;
-}
-.material-text {
-    font-size: 1.05rem; 
-    line-height: 1.6;
-    color: var(--text-color);
-}
-.material-badge {
-    display: inline-block;
-    padding: 4px 10px;
-    background-color: var(--primary-color);
-    color: white;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    margin-right: 5px;
-}
-</style>
+<div class="material-title">📘 本章目標與工程用途</div>
+
+Monte Carlo 模擬（MCS）是一種透過大量隨機抽樣，來估計工程事件風險的方法。  
+在土木工程中非常常用，例如：
+
+- 🌧️ **洪水風險評估**：計算未來 50 年出現大洪水的機率  
+- 🏗️ **材料強度不確定性**：混凝土抗壓強度不足的機率  
+- 🏞️ **邊坡穩定度 FOS < 1 的機率（滑動機率）**  
+- 🚧 **結構荷重組合的超載風險**  
+
+當數學公式難以推導時（例如參數太多、不確定性太強），MCS 是最直觀、最強大的方法。  
+工程師常用它來回答：
+
+- ❓「失敗機率是多少？」  
+- ❓「多少年內會發生一次？」  
+- ❓「如何量化不確定性？」  
+
+本章將帶你用互動式介面，實際進行一次工程風險模擬。
 """, unsafe_allow_html=True)
 
-# ============================================
-# Page Title
-# ============================================
-st.title("🎲 Monte Carlo 工程可靠度模擬")
-
-# ============================================
-# 工程用途卡片
-# ============================================
+# ============================================================
+# 📚 名詞定義與說明
+# ============================================================
 st.markdown("""
-<div class="material-card">
-    <div class="material-title">📘 為什麼需要 Monte Carlo？（工程用途）</div>
-    <div class="material-text">
-Monte Carlo 模擬是工程界最常用的風險分析工具之一，用來估計「不確定性」帶來的安全風險。  
-常見應用包含：
+<div class="material-title">📚 名詞定義與說明</div>
 
-- 邊坡穩定（強度 / 受力變異 → 崩塌機率）
-- 洪峰流量推估（降雨變化 → 超標機率）
-- 結構承載力（材料強度變異 → 破壞機率）
-- 混凝土/鋼筋設計（荷載 vs. 強度 → 安全度評估）
+### 🎯 **失效事件（Failure Event）**
+在工程設計中，通常定義為：  
+**當「負載 > 強度」時，系統失效**  
+例如：
+- 邊坡：外力 > 抗力  
+- 結構：荷載 > 材料強度  
+- 洪水：流量 > 堤防容量  
 
-其核心計算公式為：
+---
 
-<div class="material-badge">失效機率 Pf = P(g(X) &lt; 0)</div>
-<div class="material-badge">可靠度 β = -Φ⁻¹(Pf)</div>
+### 🎯 **隨機變數（Random Variables）**
+在 MCS 中，所有不確定量都視為隨機變數，例如：
+- 土壤黏聚力 ~ Normal(μ=25, σ=5)
+- 風速 ~ Weibull(k, λ)
+- 洪峰流量 ~ Lognormal
 
-其中  
-**g(X)** 為 Limit State（極限狀態）  
-**Pf** 為失敗的機率  
-**β（Beta Index）** 為可靠度指標，多用於結構工程的安全設計。
-    </div>
-</div>
+---
+
+### 🎯 **失效機率（Probability of Failure, Pf）**
+Pf = 失效次數 / 模擬總次數  
+工程師最關心的就是這個值。
+
+---
+
+### 🎯 **可靠度指標 β（Reliability Index）**
+Pf = Φ(-β)  
+β 越大，代表越安全。
+
+---
+
+### 🎯 **Monte Carlo 的核心做法**
+1. 從分布中產生大量樣本  
+2. 每次模擬一次事件（是否失效）  
+3. 統計失效比例 Pf  
+4. 若需要，再推算 β  
+
+---
+
+這些概念後面章節會更深入，本章先讓你用直觀方式理解模擬過程。
 """, unsafe_allow_html=True)
 
-# ============================================
-# 名詞定義卡片
-# ============================================
-st.markdown("""
-<div class="material-card">
-    <div class="material-title">📚 名詞定義（基礎版）</div>
-    <div class="material-text">
-**📌 Limit State Function（極限狀態式）**  
-用來判斷結構是否安全：  
-g(X) = Resistance – Load  
-g(X) &lt; 0 → 失效  
+st.markdown("---")
+st.markdown("""<div class="material-title">🧪 互動式操作</div>""", unsafe_allow_html=True)
 
-**📌 Pf（Failure Probability，失效機率）**  
-系統在隨機條件下發生失敗的機率。
+# ============================================================
+# 🧪 Step 1：設定隨機分布
+# ============================================================
 
-**📌 β（Reliability Index，可靠度指標）**  
-反映結構的安全程度，β 越高越安全。  
-土木結構常見 β = 3.0 ~ 4.0。
-
-**📌 Monte Carlo Simulation**  
-大量隨機生成樣本（通常 1,000 ~ 1,000,000 次），  
-用於模擬實際工程中的不確定性與變動。
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-# ============================================
-# Input Section
-# ============================================
-st.header("🧮 Step 1. 定義隨機變數（Load vs Strength）")
+st.subheader("Step 1：設定負載與強度的分布")
 
 col1, col2 = st.columns(2)
 
 with col1:
-    st.subheader("📌 強度 (Resistance)")
-    R_mean = st.number_input("平均 Strength μ_R", value=100.0)
-    R_std = st.number_input("標準差 σ_R", value=10.0)
+    st.markdown("**📌 負載 Load（L）分布**")
+    L_mean = st.number_input("負載平均值 μ_L", value=50.0)
+    L_std = st.number_input("負載標準差 σ_L", value=10.0)
 
 with col2:
-    st.subheader("📌 荷載 (Load)")
-    L_mean = st.number_input("平均 Load μ_L", value=80.0)
-    L_std = st.number_input("標準差 σ_L", value=8.0)
+    st.markdown("**📌 強度 Strength（R）分布**")
+    R_mean = st.number_input("強度平均值 μ_R", value=80.0)
+    R_std = st.number_input("強度標準差 σ_R", value=12.0)
 
-st.header("🎛 Step 2. 模擬設定")
+# ============================================================
+# 🧪 Step 2：模擬次數
+# ============================================================
 
-N = st.number_input("Monte Carlo 模擬次數 N", value=5000, step=1000)
+st.subheader("Step 2：設定模擬次數")
+N = st.slider("模擬次數（越大越精準）", 1000, 1000000, 10000)
 
-# ============================================
-# Simulation
-# ============================================
-if st.button("開始模擬 🎲"):
-    R = np.random.normal(R_mean, R_std, N)
-    L = np.random.normal(L_mean, L_std, N)
-    g = R - L  # Limit state
-    
-    Pf = np.mean(g < 0)
-    
-    if Pf > 0:
-        beta = -stats.norm.ppf(Pf)
-    else:
-        beta = np.inf
+# ============================================================
+# 🧪 Step 3：執行模擬
+# ============================================================
 
-    st.success(f"📌 **失效機率 Pf = {Pf:.6f}**")
-    st.info(f"📌 **可靠度指標 β = {beta:.3f}**")
+st.subheader("Step 3：執行 Monte Carlo 模擬")
+
+if st.button("▶ 開始模擬"):
+    # 產生負載與強度樣本
+    L_sample = np.random.normal(L_mean, L_std, N)
+    R_sample = np.random.normal(R_mean, R_std, N)
+
+    # 判斷失效
+    failure = L_sample > R_sample
+    Pf = failure.mean()
+
+    # 可靠度 β
+    from scipy.stats import norm
+    beta = -norm.ppf(Pf) if Pf > 0 else np.inf
+
+    st.success(f"失效機率 Pf = **{Pf:.4f}**")
+    st.info(f"可靠度指標 β = **{beta:.3f}**")
 
     # Plot
-    plt.figure(figsize=(8,4))
-    plt.hist(g, bins=30)
-    plt.axvline(0, linestyle="--")
-    plt.title("Distribution of g(X) = R - L")
-    plt.xlabel("g")
-    st.pyplot(plt)
+    fig, ax = plt.subplots(figsize=(8, 4))
+    ax.hist(L_sample, bins=40, alpha=0.6, label="Load L")
+    ax.hist(R_sample, bins=40, alpha=0.6, label="Strength R")
+    ax.set_title("負載與強度分布")
+    ax.legend()
+    st.pyplot(fig)
 
-    st.write("下表為部分模擬結果（前 20 筆）")
-    st.dataframe(
-        {"R": R[:20], "L": L[:20], "g": g[:20]}
-    )
+    # Download results
+    result_df = pd.DataFrame({
+        "Load_sample": L_sample,
+        "Strength_sample": R_sample,
+        "Failure": failure
+    })
+    csv = result_df.to_csv(index=False).encode("utf-8")
+    st.download_button("下載模擬結果 CSV", csv, file_name="MonteCarlo_output.csv")
+
+else:
+    st.info("請按下『開始模擬』來執行 Monte Carlo")
