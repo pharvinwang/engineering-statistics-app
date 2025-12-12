@@ -181,4 +181,13 @@ with st.container():
 
     df2 = df.copy()
     df2["is_outlier_1.5IQR"] = out_mask.values
-    csv = df2.to_csv(index=F_
+    csv = df2.to_csv(index=False).encode("utf-8")
+
+    st.download_button(
+        "📥 下載帶異常值標記的 CSV",
+        csv,
+        file_name="data_with_outlier_flag.csv",
+        mime="text/csv"
+    )
+
+    st.markdown("</div>", unsafe_allow_html=True)
