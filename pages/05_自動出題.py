@@ -1,6 +1,10 @@
 import streamlit as st
 import random
 import pandas as pd
+from theme import apply_theme
+
+# 套用 Material UI 主題
+apply_theme()
 
 # ============================================
 # Material UI CSS
