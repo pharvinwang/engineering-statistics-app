@@ -44,16 +44,6 @@ st.markdown("""
 # ===================================
 st.set_page_config(page_title="描述統計與資料探索", layout="wide")
 
-st.markdown("""
-<style>
-.material-title {
-    font-size: 1.6rem; 
-    font-weight: 700; 
-    color: #0a74da;
-    margin-bottom: 0.3rem;
-}
-</style>
-""", unsafe_allow_html=True)
 
 st.title("📊 描述統計與資料探索")
 
