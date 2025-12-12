@@ -6,7 +6,7 @@ from scipy.stats import genextreme as gev
 from io import StringIO
 
 st.set_page_config(page_title="極值與 GEV", layout="wide")
-st.title("🌧️ 極值統計（GEV）")
+
 # ============================================
 # Material UI Style Injection
 # ============================================
@@ -25,6 +25,12 @@ st.markdown("""
 }
 </style>
 """, unsafe_allow_html=True)
+
+# ===================================
+# Title
+# ===================================
+st.title("🌧️ 極值統計（GEV）")
+
 # ============================================================
 # 📘 本章目標與工程用途
 # ============================================================
