@@ -3,6 +3,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 st.set_page_config(page_title="Monte Carlo 模擬", layout="wide")
+
+# ===================================
+# Title
+# ===================================
 st.title("🎲 Monte Carlo 風險模擬")
 
 # ============================================================
