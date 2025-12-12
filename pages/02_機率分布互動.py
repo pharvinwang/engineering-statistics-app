@@ -55,7 +55,6 @@ st.markdown("""
 - 水文設計：降雨量、洪峰流量
 - 結構設計：材料強度、載重分布
 - 土木工程風險評估：邊坡穩定、洪水概率
-""", unsafe_allow_html=True)
 
 <div class="material-title">📚 **名詞定義與說明**</div>
 - **PDF (Probability Density Function)**：連續型隨機變數的機率密度函數，用於描述特定值附近的相對可能性。
