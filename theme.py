@@ -1,68 +1,79 @@
 import streamlit as st
 
-# ------------------------------------------------------
-# 儲存主題設定
-# ------------------------------------------------------
+# 初始化 Session State
 def init_theme_state():
-    if "theme" not in st.session_state:
-        st.session_state.theme = "Material Light"
+    if "theme_mode" not in st.session_state:
+        st.session_state.theme_mode = "light"
+
+# 全域主題套用
+def apply_theme():
+
+    init_theme_state()
+
+    # Sidebar 主題切換選單
+    mode = st.sidebar.radio(
+        "🎨 Material UI 主題",
+        ["Material Light", "Material Dark", "Engineering Blue"],
+        index=0
+    )
+
+    st.session_state.theme_mode = mode
+
+    # 套用 CSS
+    if mode == "Material Light":
+        css = MATERIAL_LIGHT
+    elif mode == "Material Dark":
+        css = MATERIAL_DARK
+    else:
+        css = ENGINEERING_BLUE
+
+    st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
 
 
-# ------------------------------------------------------
-# Material UI 主題 CSS
-# ------------------------------------------------------
-def get_material_theme_css(theme_name):
+# ------------------------------------------------------------
+#           Material UI Style Sheets
+# ------------------------------------------------------------
 
-    # ===== Material Light =====
-    if theme_name == "Material Light":
-        return """
-        <style>
-        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+MATERIAL_LIGHT = """
+body {
+    background-color: #FAFAFA;
+    font-family: 'Roboto', sans-serif;
+}
+.material-card {
+    background: #FFFFFF;
+    padding: 20px;
+    border-radius: 12px;
+    margin: 20px 0px;
+    box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
+}
+"""
 
-        html, body, [class*="css"] {
-            font-family: 'Roboto', sans-serif !important;
-            background-color: #FAFAFA !important;
-            color: #212121 !important;
-        }
+MATERIAL_DARK = """
+body {
+    background-color: #121212;
+    color: #EEEEEE;
+    font-family: 'Roboto', sans-serif;
+}
+.material-card {
+    background: #1E1E1E;
+    padding: 20px;
+    border-radius: 12px;
+    margin: 20px 0px;
+    box-shadow: 0px 2px 8px rgba(255,255,255,0.1);
+}
+"""
 
-        h1, h2, h3 {
-            color: #1A237E !important;
-            font-weight: 500 !important;
-        }
-
-        .material-card {
-            background: #FFFFFF;
-            padding: 1.4rem;
-            border-radius: 12px;
-            box-shadow: 0px 3px 8px rgba(0,0,0,0.12);
-        }
-
-        .stButton>button {
-            background-color: #2962FF !important;
-            color: white !important;
-            border-radius: 6px !important;
-            border: none;
-            padding: 0.6rem 1.2rem !important;
-            font-weight: 500 !important;
-        }
-
-        section[data-testid="stSidebar"] {
-            background-color: #ECEFF1 !important;
-        }
-        </style>
-        """
-
-    # ===== Material Dark =====
-    elif theme_name == "Material Dark":
-        return """
-        <style>
-        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
-
-        html, body, [class*="css"] {
-            font-family: 'Roboto', sans-serif !important;
-            background-color: #121212 !important;
-            color: #E0E0E0 !important;
-        }
-
-        h1, h2, h3 {
-            color: #90CA
+ENGINEERING_BLUE = """
+body {
+    background-color: #F0F6FF;
+    font-family: 'Roboto', sans-serif;
+}
+.material-card {
+    background: #FFFFFF;
+    padding: 20px;
+    border-radius: 12px;
+    border-left: 6px solid #1976D2;
+    margin: 20px 0px;
+    box-shadow: 0px 2px 6px rgba(25,118,210,0.2);
+}
+"""
