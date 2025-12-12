@@ -62,9 +62,9 @@ st.markdown("""
         4. 實證 CDF vs. Gumbel 理論 CDF 比較  
 
         這些分析方法在工程界用於：  
-        <span class="material-badge">設計標準推估</span>
-        <span class="material-badge">風險評估</span>
-        <span class="material-badge">重現期分析</span>
+        <div class="material-badge">設計標準推估</div>
+        <div class="material-badge">風險評估</div>
+        <div class="material-badge">重現期分析</div>
     </div>
 </div>
 """, unsafe_allow_html=True)
