@@ -2,165 +2,92 @@ import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.stats as stats
-from theme import apply_theme
 
-# 套用 Material UI 主題
-apply_theme()
-
-st.set_page_config(page_title="機率分布互動", page_icon="📈", layout="wide")
-
-# ===============================
-# 名詞定義卡片（Material UI）
-# ===============================
-st.markdown("""
-<div class="material-card">
-  <div class="material-title">📘 重要機率分布名詞定義與工程用途</div>
-  <div class="material-text">
-
-  <b>PDF：機率密度函數（Probability Density Function）</b><br>
-  描述變數「在哪些數值附近較常出現」。  
-  工程用途：材料強度分布、降雨強度分布、風速分布、交通流量分布等。  
-  <br><br>
-
-  <b>CDF：累積機率函數（Cumulative Distribution Function）</b><br>
-  描述某數值以下的累積機率，例如「雨量小於 100 mm 的機率」。  
-  <br>
-  工程用途：判斷安全界限、計算達標率、評估合格率、風險之下限估計。  
-  <br><br>
-
-  <b>超越機率 Exceedance Probability</b><br>
-  指「某事件超過指定門檻的機率」。  
-  工程用途：  
-  - 降雨大於 200 mm 的機率  
-  - 混凝土強度低於設計值的機率  
-  - 風速超過設計基準的機率  
-  <br><br>
-
-  <b>百分位數 Percentile</b><br>
-  「資料中，有多少比例會低於某個值」。  
-  工程用途：  
-  - 設計暴雨量（如 95 百分位）  
-  - 材料最小保證強度（如 5 百分位）  
-  <br><br>
-
-  <b>三個常用工程分布：</b><br>
-  <b>正態分布 Normal：</b> 用於誤差、材料尺寸、測量誤差。  
-  <br>
-  <b>對數正態 Lognormal：</b> 用於非負資料，如降雨、流量、材料強度。  
-  <br>
-  <b>威布爾 Weibull：</b> 用於風速、材料破壞機率、壽命分布。  
-  <br><br>
-
-  （註：後續「工程極值分析」將補充 GEV 分布處理最大事件。）
-  </div>
-</div>
-""", unsafe_allow_html=True)
-
-# ===============================
-# 分布選單
-# ===============================
+# ===================================
+# 標題與章節說明
+# ===================================
 st.title("📈 機率分布互動模組")
 
-dist_name = st.selectbox(
-    "選擇分布類型",
-    ["Normal（正態）", "Lognormal（對數正態）", "Weibull（威布爾）"]
-)
+st.markdown("""
+🎯 **本章目標與工程用途**
 
-# ===============================
-# 參數輸入
-# ===============================
-st.subheader("🧮 分布參數設定")
+本章主要目標：
+- 了解常用工程分布（正態、對數正態、指數、Gamma、Poisson）的特性
+- 透過互動式操作調整分布參數，觀察 PDF、CDF、超越機率
+- 將統計分布應用於工程風險評估與設計
 
-if dist_name == "Normal（正態）":
-    mu = st.number_input("平均值 μ", value=50.0)
-    sigma = st.number_input("標準差 σ", value=10.0, min_value=0.001)
-    dist = stats.norm(mu, sigma)
-    param_text = f"μ = {mu}, σ = {sigma}"
+工程用途示例：
+- 水文設計：降雨量、洪峰流量
+- 結構設計：材料強度、載重分布
+- 土木工程風險評估：邊坡穩定、洪水概率
+""")
 
-elif dist_name == "Lognormal（對數正態）":
-    mean = st.number_input("對數平均 μ_log", value=3.0)
-    sd = st.number_input("對數標準差 σ_log", value=0.25, min_value=0.001)
-    dist = stats.lognorm(s=sd, scale=np.exp(mean))
-    param_text = f"μ_log = {mean}, σ_log = {sd}"
+st.markdown("""
+📚 **名詞定義與說明**
+- **PDF (Probability Density Function)**：連續型隨機變數的機率密度函數，用於描述特定值附近的相對可能性。
+- **CDF (Cumulative Distribution Function)**：累積機率函數，表示隨機變數 ≤ 某值的機率。
+- **超越機率 (Exceedance Probability)**：事件大於某臨界值的機率，例如洪水超過設計水位的機率。
+- **λ (rate / mean)**：指數分布或 Poisson 分布的參數，決定事件發生頻率。
+- **μ, σ**：平均值與標準差，用於正態分布描述資料中心與散布。
+""")
 
-elif dist_name == "Weibull（威布爾）":
-    shape = st.number_input("形狀參數 k", value=2.0, min_value=0.1)
-    scale = st.number_input("尺度參數 λ", value=50.0, min_value=0.1)
-    dist = stats.weibull_min(shape, scale=scale)
-    param_text = f"k = {shape}, λ = {scale}"
+st.markdown("---")
+st.markdown("### 📌 以下開始互動式操作")
 
-# ===============================
-# 顯示參數
-# ===============================
-st.info(f"📌 分布參數：{param_text}")
+# ===================================
+# 互動操作
+# ===================================
+dist = st.selectbox("選擇分布", ["Normal","Lognormal","Exponential","Gamma","Poisson"])
+x_min = st.number_input("x min", value=0.0)
+x_max = st.number_input("x max", value=200.0)
+x = np.linspace(x_min, x_max, 500)
 
-# ===============================
-# 繪圖：PDF & CDF
-# ===============================
-st.subheader("📊 PDF / CDF 圖形")
+if dist=="Normal":
+    mu = st.slider("μ (mean)", -50.0, 300.0, 100.0)
+    sigma = st.slider("σ (std)", 0.1, 200.0, 20.0)
+    pdf = stats.norm.pdf(x, loc=mu, scale=sigma)
+    cdf = stats.norm.cdf(x, loc=mu, scale=sigma)
+elif dist=="Lognormal":
+    s = st.slider("shape (s)", 0.1, 2.0, 0.6)
+    scale = st.slider("scale (exp(μ))", 1.0, 200.0, 100.0)
+    pdf = stats.lognorm.pdf(x, s=s, scale=scale)
+    cdf = stats.lognorm.cdf(x, s=s, scale=scale)
+elif dist=="Exponential":
+    lam = st.slider("λ (rate)", 0.01, 2.0, 0.1)
+    pdf = stats.expon.pdf(x, scale=1/lam)
+    cdf = stats.expon.cdf(x, scale=1/lam)
+elif dist=="Gamma":
+    a = st.slider("shape (k)", 0.1, 10.0, 2.0)
+    scale = st.slider("scale (θ)", 0.1, 50.0, 10.0)
+    pdf = stats.gamma.pdf(x, a, scale=scale)
+    cdf = stats.gamma.cdf(x, a, scale=scale)
+else: # Poisson discrete
+    lam = st.slider("λ (mean)", 0.1, 50.0, 5.0)
+    xs = np.arange(int(x_min), int(x_max)+1)
+    pmf = stats.poisson.pmf(xs, mu=lam)
+    fig, ax = plt.subplots()
+    ax.bar(xs, pmf)
+    ax.set_title("Poisson PMF")
+    st.pyplot(fig)
+    st.stop()
 
-x = np.linspace(dist.ppf(0.001), dist.ppf(0.999), 200)
-
-fig, ax = plt.subplots(1, 2, figsize=(14, 4))
-
-ax[0].plot(x, dist.pdf(x))
-ax[0].set_title("PDF（機率密度函數）")
-ax[0].set_xlabel("x")
-ax[0].set_ylabel("density")
-
-ax[1].plot(x, dist.cdf(x))
-ax[1].set_title("CDF（累積機率函數）")
-ax[1].set_xlabel("x")
-ax[1].set_ylabel("probability")
-
+fig, ax = plt.subplots(1,2, figsize=(12,4))
+ax[0].plot(x, pdf); ax[0].set_title("PDF")
+ax[1].plot(x, cdf); ax[1].set_title("CDF")
 st.pyplot(fig)
 
-# ===============================
-# 超越機率查詢
-# ===============================
-st.subheader("🎯 超越機率查詢 (P(X > x))")
-
-threshold = st.number_input("輸入門檻 x", value=60.0)
-
-p_exceed = 1 - dist.cdf(threshold)
-st.metric("超越機率", f"{p_exceed:.4f}")
-
-# ===============================
-# 百分位數查詢
-# ===============================
-st.subheader("📌 百分位數查詢（Percentile）")
-
-pctl = st.slider("選擇百分位數 (%)", 1, 99, 95)
-value_pctl = dist.ppf(pctl / 100)
-st.metric(f"{pctl} 百分位值", f"{value_pctl:.3f}")
-
-# ===============================
-# 額外工程應用說明區（Material UI）
-# ===============================
-st.markdown(f"""
-<div class="material-card">
-  <div class="material-title">🔍 工程應用說明：{dist_name}</div>
-  <div class="material-text">
-
-  <b>Normal（正態）用途：</b><br>
-  • 混凝土抗壓強度（高品質材料）  
-  • 施工誤差、量測誤差  
-  • 材料尺寸公差  
-  <br><br>
-
-  <b>Lognormal（對數正態）用途：</b><br>
-  • 雨量、流量（皆為非負且右偏）  
-  • 土壤滲透係數  
-  • 破壞強度資料常呈對數正態分布  
-  <br><br>
-
-  <b>Weibull（威布爾）用途：</b><br>
-  • 風速分布（氣象工程最常見）  
-  • 材料疲勞壽命、破壞機率  
-  • 可靠度工程（壽命模型）  
-  <br><br>
-
-  （註：後續「極值與 GEV」頁面將介紹最大值事件，不同於本頁面的常態資料分析。）
-  </div>
-</div>
-""", unsafe_allow_html=True)
+# compute exceedance probability
+a = st.number_input("計算 P(X ≥ a) 的 a 值", value=float(x_max))
+if dist!="Poisson":
+    if dist=="Normal":
+        p_exceed = 1 - stats.norm.cdf(a, loc=mu, scale=sigma)
+    elif dist=="Lognormal":
+        p_exceed = 1 - stats.lognorm.cdf(a, s=s, scale=scale)
+    elif dist=="Exponential":
+        p_exceed = 1 - stats.expon.cdf(a, scale=1/lam)
+    elif dist=="Gamma":
+        p_exceed = 1 - stats.gamma.cdf(a, a, scale=scale)
+    st.write(f"P(X ≥ {a}) ≈ {p_exceed:.6f} ({p_exceed*100:.4f}%)")
+    years = st.slider("累積年數（計算至少一次發生的機率）", 1, 100, 10)
+    p_any = 1 - (1-p_exceed)**years
+    st.write(f"{years} 年內至少一次發生的機率 ≈ {p_any*100:.4f}%")
