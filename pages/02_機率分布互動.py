@@ -44,9 +44,9 @@ st.markdown("""
 st.title("📈 機率分布互動模組")
 
 st.markdown("""
-<div class="material-title">🎯 **本章目標與工程用途**</div>
-""", unsafe_allow_html=True)
-st.markdown("""
+<div class="material-title">📘 **本章目標與工程用途**</div>
+
+
 本章主要目標：
 - 了解常用工程分布（正態、對數正態、指數、Gamma、Poisson）的特性
 - 透過互動式操作調整分布參數，觀察 PDF、CDF、超越機率
@@ -56,7 +56,7 @@ st.markdown("""
 - 水文設計：降雨量、洪峰流量
 - 結構設計：材料強度、載重分布
 - 土木工程風險評估：邊坡穩定、洪水概率
-""")
+""", unsafe_allow_html=True)
 
 st.markdown("""
 📚 **名詞定義與說明**
