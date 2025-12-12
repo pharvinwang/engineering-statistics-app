@@ -4,6 +4,24 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.stats import genextreme as gev
 from io import StringIO
+# ============================================
+# Material UI Style Injection
+# ============================================
+st.markdown("""
+<style>
+.material-title {
+    font-size: 1.6rem; 
+    font-weight: 700; 
+    color: var(--primary-color);
+    margin-bottom: 0.3rem;
+}
+.material-text {
+    font-size: 1.05rem; 
+    line-height: 1.6;
+    color: var(--text-color);
+}
+</style>
+""", unsafe_allow_html=True)
 
 st.set_page_config(page_title="極值與 GEV", layout="wide")
 
