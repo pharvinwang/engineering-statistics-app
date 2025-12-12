@@ -1,79 +1,111 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-from io import StringIO
 import scipy.stats as stats
 import matplotlib.pyplot as plt
-from theme import apply_theme
+from io import StringIO
 
-# 套用 Material UI 主題
-apply_theme()
 # ============================================
-# Material UI CSS
+# Material UI Style Injection
 # ============================================
 st.markdown("""
 <style>
-.card {
-    background: #ffffffcc;
-    padding: 1.2rem 1.4rem;
+.material-card {
+    background-color: var(--background-color);
+    padding: 1.6rem;
     border-radius: 12px;
-    border: 1px solid #e0e0e0;
-    margin-bottom: 1.2rem;
-    box-shadow: 0 2px 6px #00000015;
+    border: 1px solid var(--primary-color);
+    box-shadow: 0 4px 10px var(--shadow-color);
+    margin-bottom: 1.5rem;
 }
-h1, h2, h3 {
-    color: #1976d2;
-    font-weight: 700;
+.material-title {
+    font-size: 1.6rem; 
+    font-weight: 700; 
+    color: var(--primary-color);
+    margin-bottom: 0.3rem;
+}
+.material-text {
+    font-size: 1.05rem; 
+    line-height: 1.6;
+    color: var(--text-color);
+}
+.material-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 6px;
+    font-size: 0.9rem;
 }
 </style>
 """, unsafe_allow_html=True)
 
 # ============================================
-# Title
+# Page Title
 # ============================================
-st.title("📈 極值分析（Gumbel / GEV）— Material UI 版")
+st.title("🌧️ 工程極值分析（Gumbel / GEV）")
 
 st.markdown("""
-本頁示範工程常用的 **極值統計（Extreme Value Analysis）**：
+<div class="material-card">
+    <div class="material-title">📘 本章目標與工程用途</div>
+    <div class="material-text">
+        工程設計常需要估計「極端事件」的發生機率，例如：  
+        - 暴雨的最大日雨量（排水 / 沖刷）  
+        - 洪峰流量（堤防 / 大壩安全）  
+        - 最大風速（高樓 / 橋梁抗風）  
+        - 最大全浪（海堤 / 離岸平台）  
 
-- 適用於：  
-  🌧 **最大日雨量**、最大風速、最大流量  
-  🏗 **最大載重、材料強度極值**
+        本頁示範：  
+        1. 極值資料上傳與檢視  
+        2. 使用 **Gumbel 分布** 快速估計重現期  
+        3. 計算超越機率與年發生機率  
+        4. 實證 CDF vs. Gumbel 理論 CDF 比較  
 
-- 本頁提供：  
-  ✔ Gumbel 分布快速估計（工程常用）  
-  ✔ 超越機率 P(X ≥ x)  
-  ✔ N 年內至少一次發生的機率  
-  ✔ 實測 CDF vs 模型 CDF 圖形  
-
----
-
-### 📘 專有名詞快速解釋（讓學生更快上手）
-
-#### **Gumbel 分布（Type I 極值）**
-- 用途：描述「最大值」行為（降雨、風速、洪峰）  
-- 工程意義：用來推估 **重現期 T-year rainfall** 或 **極端事件風險**
-
-#### **GEV 分布（Generalized Extreme Value）**
-- Gumbel 只是 GEV 的一種  
-- 未來章節會說明 shape parameter ξ 如何決定尾端行為  
-
-#### **重現期 Return Period (T-year)**
-- T = 1 / 年 exceedance probability  
-- 例如：  
-  年超越機率 = 1% → 100 年重現期事件  
-
-以上名詞在後面章節會完整推導，這裡先用「概念模式」讓同學建立工程上的感覺。
-""")
+        這些分析方法在工程界用於：  
+        <span class="material-badge">設計標準推估</span>
+        <span class="material-badge">風險評估</span>
+        <span class="material-badge">重現期分析</span>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
 # ============================================
-# 資料上傳區
+# 名詞定義卡片
 # ============================================
-st.markdown("<div class='card'>", unsafe_allow_html=True)
-st.subheader("1️⃣ 資料上傳（每年一筆極值）")
+st.markdown("""
+<div class="material-card">
+    <div class="material-title">📚 名詞定義：GEV、Gumbel、重現期</div>
+    <div class="material-text">
+
+**📌 年最大值 (Annual Maxima)**  
+每年挑出「最大的」那一筆數據，如最大日雨量、最大風速。
+
+**📌 Gumbel 分布 (Extreme Type I)**  
+GEV 的一種特例，用來描述極端事件的最大值。簡化公式、容易估參。
+
+**📌 GEV 分布 (Generalized Extreme Value)**  
+更廣泛的極值分布，包含三類型（Fréchet、Weibull、Gumbel）。
+
+**📌 重現期 (Return Period)**  
+平均多久會出現一次某個極端事件，例如：  
+T = 50 年 → 平均 50 年出現一次  
+對應超越機率：p = 1/T。
+
+**📌 超越機率 (Exceedance Probability)**  
+事件一年內大於某閾值 x 的機率：  
+p = P(X ≥ x)
+
+</div>
+</div>
+""", unsafe_allow_html=True)
+
+# ============================================
+# Upload Section
+# ============================================
+st.header("📁 輸入極值資料（每年一筆）")
 
 uploaded = st.file_uploader("上傳 CSV（需含年度極值欄位）", type=["csv"])
-use_sample = st.checkbox("使用範例資料 (20 年最大日雨量)", value=True)
+use_sample = st.checkbox("使用範例（20 年最大日雨量）", value=True)
 
 if use_sample:
     sample = """year,max_daily_rain_mm
@@ -101,26 +133,21 @@ if use_sample:
     df = pd.read_csv(StringIO(sample))
 else:
     if uploaded is None:
-        st.info("請上傳 CSV，或勾選使用範例資料。")
+        st.info("請上傳 CSV 或使用範例資料。")
         st.stop()
     df = pd.read_csv(uploaded)
 
-st.write("📄 **資料預覽**")
 st.dataframe(df.head())
-st.markdown("</div>", unsafe_allow_html=True)
 
-# ============================================
-# 欄位選擇
-# ============================================
 numeric = df.select_dtypes(include=[np.number]).columns.tolist()
-col = st.selectbox("選擇年最大值欄位", numeric)
+col = st.selectbox("選擇「年度極值」欄位", numeric)
+
 data = df[col].dropna().astype(float)
 
 # ============================================
-# Gumbel 參數估計
+# Gumbel Quick Estimate
 # ============================================
-st.markdown("<div class='card'>", unsafe_allow_html=True)
-st.subheader("2️⃣ Gumbel 參數快速估計（工程常用簡化法）")
+st.header("📌 Gumbel 分布快速參數估計")
 
 mean = data.mean()
 s = data.std(ddof=1)
@@ -128,62 +155,53 @@ beta = s / (np.pi / np.sqrt(6))
 gamma = 0.5772156649
 mu = mean - gamma * beta
 
-st.write(f"樣本平均 = **{mean:.3f}**")
-st.write(f"樣本標準差 = **{s:.3f}**")
-st.success(f"Gumbel 估計參數： μ = **{mu:.3f}**,  β = **{beta:.3f}**")
-
-st.markdown("""
-📝 **說明**：  
-這是工程常用的 Gumbel 參數取得方式，快速且在極值樣本不多時表現穩定。  
-後續章節會介紹更精準的方法（MLE、L-moment）。
-""")
-st.markdown("</div>", unsafe_allow_html=True)
+st.markdown(f"""
+<div class="material-card">
+<div class="material-title">📐 Gumbel 快速估計結果</div>
+<div class="material-text">
+平均 = {mean:.3f}  
+樣本標準差 = {s:.3f}  
+<br>
+**估計參數：**  
+μ = {mu:.3f}  
+β = {beta:.3f}  
+</div>
+</div>
+""", unsafe_allow_html=True)
 
 # ============================================
-# 超越機率
+# Exceedance Probability
 # ============================================
-st.markdown("<div class='card'>", unsafe_allow_html=True)
-st.subheader("3️⃣ 計算超越機率 P(X ≥ x)")
+st.header("🎯 計算超越機率與重現期")
 
-x_val = st.number_input("輸入要評估的極值（例如 200 mm）", value=float(data.max()))
+x_val = st.number_input("輸入要估計超越機率的極值 x", value=float(data.max()))
 
 z = (x_val - mu) / beta
 Fx = np.exp(-np.exp(-z))
 p_exceed = 1 - Fx
 
-st.write(f"➡ **年超越機率 P(X ≥ {x_val}) = {p_exceed*100:.4f}%**")
+st.success(f"P(X ≥ {x_val}) ≈ {p_exceed:.4f}  （年超越機率）")
 
-years = st.slider("累積年數", 1, 100, 10)
+T = 1 / p_exceed if p_exceed > 0 else np.inf
+st.info(f"對應的重現期 ≈ **{T:.2f} 年**")
+
+years = st.slider("計算 N 年內至少一次發生的機率", 1, 100, 10)
 p_any = 1 - (1 - p_exceed)**years
-st.success(f"📌 **{years} 年內至少一次發生機率： {p_any*100:.4f}%**")
-
-st.markdown("""
-📘 工程用途：  
-- 設計雨水下水道  
-- 判斷 50 年、100 年洪水量  
-- 設施是否需強化或提高安全係數  
-""")
-
-st.markdown("</div>", unsafe_allow_html=True)
+st.write(f"{years} 年內至少一次發生機率：**{p_any:.2%}**")
 
 # ============================================
-# 圖形：Empirical vs Gumbel
+# Plot
 # ============================================
-st.markdown("<div class='card'>", unsafe_allow_html=True)
-st.subheader("4️⃣ 實測 CDF vs Gumbel CDF")
+st.header("📉 實證 CDF vs Gumbel 理論 CDF")
 
 x = np.linspace(min(data)*0.8, max(data)*1.4, 200)
-cdf_gumbel = np.exp(-np.exp(-(x - mu) / beta))
+cdf_gumbel = np.exp(-np.exp(-(x - mu)/beta))
 
-plt.figure(figsize=(8, 4))
-plt.plot(np.sort(data),
-         np.arange(1, len(data) + 1) / (len(data) + 1),
-         marker='o', linestyle='none', label='Empirical')
-
-plt.plot(x, cdf_gumbel, label='Gumbel CDF')
+plt.figure(figsize=(8,4))
+plt.plot(np.sort(data), np.arange(1,len(data)+1)/(len(data)+1),
+         marker='o', linestyle='none', label="Empirical")
+plt.plot(x, cdf_gumbel, label="Gumbel CDF")
 plt.xlabel(col)
-plt.ylabel('Cumulative Probability')
+plt.ylabel("Cumulative Probability")
 plt.legend()
-
 st.pyplot(plt)
-st.markdown("</div>", unsafe_allow_html=True)
