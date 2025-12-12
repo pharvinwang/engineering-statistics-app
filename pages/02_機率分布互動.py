@@ -2,6 +2,24 @@ import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.stats as stats
+# ============================================
+# Material UI Style Injection
+# ============================================
+st.markdown("""
+<style>
+.material-title {
+    font-size: 1.6rem; 
+    font-weight: 700; 
+    color: var(--primary-color);
+    margin-bottom: 0.3rem;
+}
+.material-text {
+    font-size: 1.05rem; 
+    line-height: 1.6;
+    color: var(--text-color);
+}
+</style>
+""", unsafe_allow_html=True)
 
 st.set_page_config(page_title="機率分布互動", layout="wide")
 
