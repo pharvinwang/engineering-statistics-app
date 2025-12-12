@@ -1,42 +1,25 @@
 import streamlit as st
-import random
-import pandas as pd
-st.title("自動出題與批改（教師工具）")
-st.markdown("產生簡單的描述統計、小測題。學生作答後可即時批改。")
+import numpy as np
+from random import randint
 
-n = st.number_input("要出題數量", 1, 10, 3)
-questions = []
-answers = []
+from theme import apply_theme
+apply_theme()
 
-for i in range(int(n)):
-    # generate random small dataset and ask mean/sd
-    data = [round(random.uniform(0.2, 1.0),2) for _ in range(8)]
-    q_text = f"資料: {data}，請計算平均與樣本標準差 (四捨五入到小數第二位)"
-    mean = round(pd.Series(data).mean(),2)
-    sd = round(pd.Series(data).std(ddof=1),2)
-    questions.append(q_text)
-    answers.append((mean, sd))
+st.title("📝 自動出題與批改系統")
 
-st.write("### 題目")
-user_answers = []
-for i,q in enumerate(questions):
-    st.write(f"Q{i+1}: {q}")
-    a1 = st.text_input(f"Q{i+1} 平均 (mean)", key=f"m{i}")
-    a2 = st.text_input(f"Q{i+1} 樣本標準差 (s)", key=f"s{i}")
-    user_answers.append((a1,a2))
+st.markdown('<div class="material-card">', unsafe_allow_html=True)
+st.subheader("📘 產生題目")
 
-if st.button("自動批改"):
-    results = []
-    for i,(ua,ub) in enumerate(user_answers):
-        try:
-            ma = float(ua); sa = float(ub)
-        except:
-            results.append("輸入格式錯誤")
-            continue
-        correct_mean, correct_sd = answers[i]
-        mean_ok = abs(ma - correct_mean) < 0.02
-        sd_ok = abs(sa - correct_sd) < 0.03
-        results.append(f"Q{i+1}: mean {'OK' if mean_ok else 'WRONG'} (正確={correct_mean}), s {'OK' if sd_ok else 'WRONG'} (正確={correct_sd})")
-    st.write("### 批改結果")
-    for r in results:
-        st.write(r)
+a = randint(10, 50)
+b = randint(1, 10)
+
+st.write(f"題目：計算樣本 {a}, {b}, 20, 30 的平均值")
+answer = (a + b + 20 + 30) / 4
+
+user = st.number_input("你的答案：")
+if st.button("批改"):
+    if abs(user - answer) < 1e-6:
+        st.success("答對了！")
+    else:
+        st.error(f"答錯了，正確答案是 {answer}")
+st.markdown('</div>', unsafe_allow_html=True)
