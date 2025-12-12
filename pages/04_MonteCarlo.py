@@ -2,6 +2,10 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from theme import apply_theme
+
+# 套用 Material UI 主題
+apply_theme()
 
 # ============================================
 # Material UI CSS
