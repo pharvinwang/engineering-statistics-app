@@ -44,7 +44,8 @@ st.markdown("""
 st.title("📈 機率分布互動模組")
 
 st.markdown("""
-🎯 **本章目標與工程用途**
+<div class="material-title">🎯 **本章目標與工程用途**</div>
+
 
 本章主要目標：
 - 了解常用工程分布（正態、對數正態、指數、Gamma、Poisson）的特性
