@@ -1,90 +1,47 @@
 import streamlit as st
-import pandas as pd
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
-from io import StringIO
 
-st.title("描述統計與視覺化")
-st.markdown("上傳 CSV 或使用範例資料。選擇數值欄位後可以查看統計摘要、直方圖、箱型圖、QQ-plot、以及 1.5*IQR 異常值偵測。")
+from theme import apply_theme
+apply_theme()
 
-uploaded = st.file_uploader("上傳 CSV (含 header)", type=["csv"])
-use_sample = st.checkbox("使用範例資料 (20 年年最大日雨量)", value=True)
+st.title("📊 描述統計（Descriptive Statistics）")
 
-if use_sample:
-    sample = """year,max_daily_rain_mm
-2001,67
-2002,98
-2003,103
-2004,84
-2005,112
-2006,135
-2007,156
-2008,90
-2009,87
-2010,120
-2011,140
-2012,155
-2013,130
-2014,160
-2015,164
-2016,142
-2017,110
-2018,97
-2019,85
-2020,81
-"""
-    df = pd.read_csv(StringIO(sample))
-else:
-    if uploaded is None:
-        st.info("請上傳 CSV 或勾選使用範例資料。")
-        st.stop()
-    df = pd.read_csv(uploaded)
+st.markdown('<div class="material-card">', unsafe_allow_html=True)
+st.subheader("📘 上傳或輸入你的資料")
 
-st.write("### 資料預覽")
-st.dataframe(df.head())
+data_input = st.text_area(
+    "請以逗號或換行分隔資料：",
+    "12, 14, 11, 15, 13"
+)
 
-numeric = df.select_dtypes(include=[np.number]).columns.tolist()
-if not numeric:
-    st.error("找不到數值欄位。")
-    st.stop()
+if st.button("計算統計量"):
+    try:
+        data = np.array([float(x) for x in data_input.replace("\n", ",").split(",") if x.strip() != ""])
+        
+        mean_val = data.mean()
+        std_val = data.std(ddof=1)
+        cv_val = std_val / mean_val
 
-col = st.selectbox("選擇數值欄位", numeric)
-data = df[col].dropna().astype(float)
+        st.success("計算成功！")
 
-st.write("**統計摘要**")
-st.write(data.describe().to_frame().T)
+        st.markdown('<div class="material-card">', unsafe_allow_html=True)
+        st.subheader("📌 統計量結果")
+        st.write(f"平均值 (Mean)：**{mean_val:.3f}**")
+        st.write(f"標準差 (Std)：**{std_val:.3f}**")
+        st.write(f"變異係數 CV：**{cv_val:.3f}**")
+        st.markdown('</div>', unsafe_allow_html=True)
 
-mean = data.mean(); s = data.std(ddof=1); cv = s/mean if mean!=0 else np.nan
-st.metric("平均 (mean)", f"{mean:.3f}")
-st.metric("樣本標準差 (s)", f"{s:.3f}")
-st.metric("變異係數 (CV)", f"{cv:.3f}")
+        st.markdown('<div class="material-card">', unsafe_allow_html=True)
+        st.subheader("📈 直方圖")
+        fig, ax = plt.subplots()
+        ax.hist(data, bins=5)
+        ax.set_title("Histogram")
+        st.pyplot(fig)
+        st.markdown('</div>', unsafe_allow_html=True)
 
-# Outliers 1.5 IQR
-q1 = data.quantile(0.25); q3 = data.quantile(0.75); iqr = q3 - q1
-lower = q1 - 1.5*iqr; upper = q3 + 1.5*iqr
-out_mask = (data < lower) | (data > upper)
-st.write(f"IQR={iqr:.3f}, 下界={lower:.3f}, 上界={upper:.3f}，偵測到 {out_mask.sum()} 個異常值。")
+    except Exception as e:
+        st.error(f"資料格式錯誤：{e}")
 
-# Plots
-fig, axes = plt.subplots(1,3, figsize=(15,4))
-axes[0].hist(data, bins=8)
-axes[0].set_title("Histogram")
-axes[1].boxplot(data, vert=False)
-axes[1].set_title("Boxplot")
-import scipy.stats as stats
-res = stats.probplot(data, dist="norm", plot=axes[2])
-axes[2].set_title("QQ-plot")
-st.pyplot(fig)
-
-st.write("### 異常值列表")
-if out_mask.any():
-    out_df = df.loc[out_mask.index[out_mask], df.columns]
-    st.dataframe(out_df)
-else:
-    st.write("未偵測到異常值 (1.5*IQR)。")
-
-# Download cleaned with flag
-df2 = df.copy()
-df2['is_outlier_1.5IQR'] = out_mask.values
-csv = df2.to_csv(index=False).encode('utf-8')
-st.download_button("下載帶異常值標記的 CSV", csv, file_name="data_with_outlier_flag.csv", mime="text/csv")
+st.markdown('</div>', unsafe_allow_html=True)
