@@ -2,63 +2,64 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from io import StringIO
 import scipy.stats as stats
+from io import StringIO
+from theme import apply_theme
 
-# -----------------------------
-# Material UI 友善樣式
-# -----------------------------
+# 套用 Material UI 主題
+apply_theme()
+
+st.set_page_config(page_title="描述統計", page_icon="📊", layout="wide")
+
+# ===============================
+# 名詞定義卡片（Material UI）
+# ===============================
 st.markdown("""
-<style>
-/* 主要容器 */
-.reportview-container .main .block-container {
-    padding-top: 2rem;
-}
+<div class="material-card">
+  <div class="material-title">📘 名詞定義與工程應用（Descriptive Statistics）</div>
+  <div class="material-text">
 
-/* 卡片樣式 */
-.card {
-    background: #ffffffaa;
-    padding: 1.2rem 1.4rem;
-    border-radius: 12px;
-    border: 1px solid #e0e0e0;
-    margin-bottom: 1.2rem;
-    box-shadow: 0 2px 6px #00000015;
-}
+  <b>平均值 Mean：</b><br>
+  數據的中心位置，用來代表「材料平均強度」、「平均含水量」、「年平均雨量」。  
+  <br><br>
 
-/* 標題配色 Material UI */
-h1, h2, h3 {
-    color: #1976d2;
-    font-weight: 700;
-}
-</style>
+  <b>標準差 Standard Deviation：</b><br>
+  描述資料的波動程度。工程上用於判斷「材料品質穩定度」或「氣候變異程度」。  
+  <u>標準差越小 → 品質越穩定。</u>  
+  <br><br>
+
+  <b>變異係數 CV：</b><br>
+  CV = 標準差 / 平均值  
+  用來比較「不同量級資料」的穩定度，例如：  
+  - 兩種不同地區的降雨量  
+  - 不同機齡設備的震動強度  
+  <br>
+  CV 越小代表資料一致性高。  
+  <br><br>
+
+  <b>IQR（四分位距）：</b><br>
+  介於 Q1~Q3 的區間。  
+  工程上用於「偵測異常值」、「品質管制」、「數據清理」。  
+  <br>
+  異常值範圍 = Q1 - 1.5×IQR 〜 Q3 + 1.5×IQR  
+  <br><br>
+
+  （註：後續 *極值統計* 章節將會更深入處理極端事件，例如最大強度、最大日雨量等。）
+  </div>
+</div>
 """, unsafe_allow_html=True)
 
-# -----------------------------
-# Title
-# -----------------------------
-st.title("📊 描述統計與視覺化（Material UI 版）")
+# ===============================
+# 原本功能（保留）
+# ===============================
+st.title("📊 描述統計與視覺化（EDA）")
+st.markdown("上傳 CSV 或使用範例資料，進行統計摘要、異常值分析與視覺化。")
 
-st.markdown("""
-本頁提供：
+uploaded = st.file_uploader("上傳 CSV (含 header)", type=["csv"])
+use_sample = st.checkbox("使用範例資料（20 年年最大日雨量）", value=True)
 
-- 資料上傳或使用範例
-- 統計摘要（mean, std, CV…）
-- 直方圖、箱型圖、QQ-plot
-- 1.5×IQR 異常值偵測  
-""")
-
-# -----------------------------
-# 資料讀取卡片
-# -----------------------------
-with st.container():
-    st.markdown("<div class='card'>", unsafe_allow_html=True)
-    st.subheader("📁 1. 載入資料")
-
-    uploaded = st.file_uploader("上傳 CSV (含 header)", type=["csv"])
-    use_sample = st.checkbox("使用範例資料 (20 年年最大日雨量)", value=True)
-
-    if use_sample:
-        sample = """year,max_daily_rain_mm
+if use_sample:
+    sample = """year,max_daily_rain_mm
 2001,67
 2002,98
 2003,103
@@ -80,114 +81,86 @@ with st.container():
 2019,85
 2020,81
 """
-        df = pd.read_csv(StringIO(sample))
-    else:
-        if uploaded is None:
-            st.info("請上傳 CSV 或勾選使用範例資料。")
-            st.markdown("</div>", unsafe_allow_html=True)
-            st.stop()
-        df = pd.read_csv(uploaded)
+    df = pd.read_csv(StringIO(sample))
+else:
+    if uploaded is None:
+        st.info("請上傳 CSV 或勾選使用範例資料。")
+        st.stop()
+    df = pd.read_csv(uploaded)
 
-    st.write("### 📄 資料預覽")
-    st.dataframe(df.head())
-    st.markdown("</div>", unsafe_allow_html=True)
+# ===============================
+# Data Preview
+# ===============================
+st.write("### 📄 資料預覽")
+st.dataframe(df.head(), use_container_width=True)
 
-# -----------------------------
-# 選擇欄位
-# -----------------------------
 numeric = df.select_dtypes(include=[np.number]).columns.tolist()
 if not numeric:
-    st.error("❌ 找不到任何數值欄位，請確認 CSV 格式。")
+    st.error("找不到數值欄位。")
     st.stop()
 
-with st.container():
-    st.markdown("<div class='card'>", unsafe_allow_html=True)
-    st.subheader("🔢 2. 選擇分析欄位")
-    col = st.selectbox("選擇數值欄位", numeric)
-    data = df[col].dropna().astype(float)
-    st.markdown("</div>", unsafe_allow_html=True)
+col = st.selectbox("選擇數值欄位", numeric)
+data = df[col].dropna().astype(float)
 
-# -----------------------------
-# 統計摘要 + CV
-# -----------------------------
-with st.container():
-    st.markdown("<div class='card'>", unsafe_allow_html=True)
-    st.subheader("📈 3. 統計摘要（Summary Statistics）")
+# ===============================
+# 統計摘要
+# ===============================
+st.write("### 📈 統計摘要")
+st.write(data.describe().to_frame().T)
 
-    st.write(data.describe().to_frame().T)
+mean = data.mean()
+std = data.std(ddof=1)
+cv = std / mean if mean != 0 else np.nan
 
-    mean = data.mean()
-    s = data.std(ddof=1)
-    cv = s / mean if mean != 0 else np.nan
+mcol1, mcol2, mcol3 = st.columns(3)
+mcol1.metric("平均值 Mean", f"{mean:.3f}")
+mcol2.metric("標準差 Std", f"{std:.3f}")
+mcol3.metric("變異係數 CV", f"{cv:.3f}")
 
-    c1, c2, c3 = st.columns(3)
-    c1.metric("平均值 Mean", f"{mean:.3f}")
-    c2.metric("樣本標準差 s", f"{s:.3f}")
-    c3.metric("變異係數 CV", f"{cv:.3f}")
+# ===============================
+# IQR Outlier Detection
+# ===============================
+q1 = data.quantile(0.25)
+q3 = data.quantile(0.75)
+iqr = q3 - q1
+lower = q1 - 1.5 * iqr
+upper = q3 + 1.5 * iqr
 
-    st.markdown("</div>", unsafe_allow_html=True)
+outliers = (data < lower) | (data > upper)
+st.write(f"#### 🛑 IQR 異常值偵測：共 {outliers.sum()} 個")
+st.write(f"IQR = {iqr:.3f}，下界 = {lower:.3f}，上界 = {upper:.3f}")
 
-# -----------------------------
-# Outlier detection
-# -----------------------------
-with st.container():
-    st.markdown("<div class='card'>", unsafe_allow_html=True)
-    st.subheader("🚨 4. 異常值偵測（1.5 × IQR）")
+# ===============================
+# 圖形
+# ===============================
+st.write("### 📊 資料視覺化")
 
-    q1 = data.quantile(0.25)
-    q3 = data.quantile(0.75)
-    iqr = q3 - q1
-    lower = q1 - 1.5 * iqr
-    upper = q3 + 1.5 * iqr
-    out_mask = (data < lower) | (data > upper)
+fig, axes = plt.subplots(1, 3, figsize=(15, 4))
 
-    st.write(f"IQR = **{iqr:.3f}**，範圍 = [{lower:.2f}, {upper:.2f}]")
-    st.write(f"偵測到 **{out_mask.sum()}** 個異常值")
+axes[0].hist(data, bins=8)
+axes[0].set_title("Histogram")
 
-    if out_mask.any():
-        st.dataframe(df.loc[out_mask.index[out_mask]])
-    else:
-        st.info("沒有偵測到異常值。")
+axes[1].boxplot(data, vert=False)
+axes[1].set_title("Boxplot")
 
-    st.markdown("</div>", unsafe_allow_html=True)
+stats.probplot(data, dist="norm", plot=axes[2])
+axes[2].set_title("QQ-plot")
 
-# -----------------------------
-# 圖表
-# -----------------------------
-with st.container():
-    st.markdown("<div class='card'>", unsafe_allow_html=True)
-    st.subheader("📊 5. 圖形分析")
+st.pyplot(fig)
 
-    fig, axes = plt.subplots(1, 3, figsize=(15, 4))
-    axes[0].hist(data, bins=8)
-    axes[0].set_title("Histogram")
+# ===============================
+# Outlier List
+# ===============================
+st.write("### 📋 異常值列表")
+if outliers.sum() > 0:
+    st.dataframe(df.loc[outliers.index[outliers]])
+else:
+    st.write("未偵測到異常值。")
 
-    axes[1].boxplot(data, vert=False)
-    axes[1].set_title("Boxplot")
-
-    stats.probplot(data, dist="norm", plot=axes[2])
-    axes[2].set_title("QQ-plot")
-
-    st.pyplot(fig)
-
-    st.markdown("</div>", unsafe_allow_html=True)
-
-# -----------------------------
-# Download result
-# -----------------------------
-with st.container():
-    st.markdown("<div class='card'>", unsafe_allow_html=True)
-    st.subheader("⬇ 6. 下載結果")
-
-    df2 = df.copy()
-    df2["is_outlier_1.5IQR"] = out_mask.values
-    csv = df2.to_csv(index=False).encode("utf-8")
-
-    st.download_button(
-        "📥 下載帶異常值標記的 CSV",
-        csv,
-        file_name="data_with_outlier_flag.csv",
-        mime="text/csv"
-    )
-
-    st.markdown("</div>", unsafe_allow_html=True)
+# ===============================
+# Download CSV
+# ===============================
+df_out = df.copy()
+df_out["is_outlier_IQR"] = outliers.values
+csv = df_out.to_csv(index=False).encode("utf-8")
+st.download_button("下載含異常值標記資料", csv, "data_with_outliers.csv", "text/csv")
