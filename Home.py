@@ -32,22 +32,21 @@ st.markdown("""
     color: var(--primary-color);
     margin-bottom: 0.5rem;
 }
-.material-subtitle {
-    font-size: 1.2rem; 
-    color: var(--text-color);
-    margin-bottom: 1rem;
-}
 .material-text {
     font-size: 1.0rem; 
     line-height: 1.6;
     color: var(--text-color);
 }
-.material-button > button {
+.material-button-container {
+    margin-top: 1rem;
+}
+.material-button {
     background-color: var(--primary-color) !important;
     color: white !important;
-    border-radius: 8px !important;
     padding: 0.6rem 1.2rem !important;
     border: none !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -65,118 +64,62 @@ st.markdown("""
     <div class="material-title">🎯 課程導覽</div>
     <div class="material-text">
         歡迎來到《工程統計學》互動平台！  
-        本系統整合資料分析、機率分布、極值統計、蒙地卡羅模擬，以及自動出題等功能，  
-        讓你能真正「用統計解工程問題」。
+        本系統整合資料分析、機率分布、極值統計、蒙地卡羅模擬，以及自動出題等功能。  
         <br><br>
-        📌 <b>所有互動介面皆採 Material UI 設計</b>，並支援主題切換（亮色 / 暗色）。
+        📌 <b>採用 Material UI 風格</b>，並支援亮色/暗色主題切換。
     </div>
 </div>
 """, unsafe_allow_html=True)
 
 # ===================================
-# 功能卡片（兩欄式）
+# 功能卡片（兩欄）
 # ===================================
 col1, col2 = st.columns(2)
 
 with col1:
-    st.markdown("""
-    <div class="material-card">
-        <div class="material-title">📊 描述統計與資料探索</div>
-        <div class="material-text">
-            查看平均值、變異、標準差、箱型圖、直方圖。<br>
-            適用於土壤、混凝土、降雨、材料強度等各類工程資料。
-        </div>
-        <div class="material-button">
-            <a href="/01_描述統計" target="_self">
-                <button>前往 ➜</button>
-            </a>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown('<div class="material-card">', unsafe_allow_html=True)
+    st.markdown('<div class="material-title">📊 描述統計與資料探索</div>', unsafe_allow_html=True)
+    st.markdown('<div class="material-text">平均、變異、標準差、直方圖、箱型圖。支援工程資料探索。</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+    st.page_link("pages/01_描述統計.py", label="前往 ➜")
 
 with col2:
-    st.markdown("""
-    <div class="material-card">
-        <div class="material-title">📈 機率分布互動模組</div>
-        <div class="material-text">
-            正態、對數正態、威布爾、指數分布等工程常用分布皆可互動調整。
-            查看 PDF、CDF、百分位數、超越機率。
-        </div>
-        <div class="material-button">
-            <a href="/02_機率分布互動" target="_self">
-                <button>前往 ➜</button>
-            </a>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown('<div class="material-card">', unsafe_allow_html=True)
+    st.markdown('<div class="material-title">📈 機率分布互動模組</div>', unsafe_allow_html=True)
+    st.markdown('<div class="material-text">正態、對數正態、Gamma、Poisson 等互動視覺化。</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+    st.page_link("pages/02_機率分布互動.py", label="前往 ➜")
 
-# ===================================
 # 第二排
-# ===================================
 col3, col4 = st.columns(2)
 
 with col3:
-    st.markdown("""
-    <div class="material-card">
-        <div class="material-title">🌧️ 工程極值統計（GEV）</div>
-        <div class="material-text">
-            估計暴雨、洪峰流量、風速、波浪等極端事件之重現期與超越機率。
-        </div>
-        <div class="material-button">
-            <a href="/03_極值與GEV" target="_self">
-                <button>前往 ➜</button>
-            </a>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown('<div class="material-card">', unsafe_allow_html=True)
+    st.markdown('<div class="material-title">🌧️ 工程極值統計（GEV）</div>', unsafe_allow_html=True)
+    st.markdown('<div class="material-text">暴雨、洪峰、風速等極端事件的重現期推估。</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+    st.page_link("pages/03_極值與_GEV.py", label="前往 ➜")
 
 with col4:
-    st.markdown("""
-    <div class="material-card">
-        <div class="material-title">🎲 蒙地卡羅風險模擬</div>
-        <div class="material-text">
-            隨機模擬工程事件，如邊坡穩定度、洪水風險、材料不確定性。
-        </div>
-        <div class="material-button">
-            <a href="/04_MonteCarlo_模擬" target="_self">
-                <button>前往 ➜</button>
-            </a>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown('<div class="material-card">', unsafe_allow_html=True)
+    st.markdown('<div class="material-title">🎲 Monte Carlo 風險模擬</div>', unsafe_allow_html=True)
+    st.markdown('<div class="material-text">邊坡、洪水、材料強度的風險模擬。</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+    st.page_link("pages/04_MonteCarlo.py", label="前往 ➜")
 
-# ===================================
 # 第三排
-# ===================================
 col5, col6 = st.columns(2)
 
 with col5:
-    st.markdown("""
-    <div class="material-card">
-        <div class="material-title">📝 自動出題系統</div>
-        <div class="material-text">
-            自動產生工程統計題目、互動作答、即時判分，非常適合練習。
-        </div>
-        <div class="material-button">
-            <a href="/05_自動出題系統" target="_self">
-                <button>前往 ➜</button>
-            </a>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown('<div class="material-card">', unsafe_allow_html=True)
+    st.markdown('<div class="material-title">📝 自動出題系統</div>', unsafe_allow_html=True)
+    st.markdown('<div class="material-text">自動出題、互動作答、即時批改。</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+    st.page_link("pages/05_自動出題.py", label="前往 ➜")
 
 with col6:
-    st.markdown("""
-    <div class="material-card">
-        <div class="material-title">🎨 UI 外觀設定</div>
-        <div class="material-text">
-            選擇主題顏色、陰影效果、亮暗模式。  
-            全站外觀將同步更新。
-        </div>
-        <div class="material-button">
-            <a href="/06_UI外觀設定" target="_self">
-                <button>前往 ➜</button>
-            </a>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown('<div class="material-card">', unsafe_allow_html=True)
+    st.markdown('<div class="material-title">🎨 UI 外觀設定</div>', unsafe_allow_html=True)
+    st.markdown('<div class="material-text">切換主題、配色、字體大小。</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+    st.page_link("pages/06_UI_外觀設定.py", label="前往 ➜")
