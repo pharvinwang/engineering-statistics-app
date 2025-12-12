@@ -4,7 +4,10 @@ import numpy as np
 from io import StringIO
 import scipy.stats as stats
 import matplotlib.pyplot as plt
+from theme import apply_theme
 
+# 套用 Material UI 主題
+apply_theme()
 # ============================================
 # Material UI CSS
 # ============================================
