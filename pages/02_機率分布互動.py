@@ -46,26 +46,24 @@ st.title("📈 機率分布互動模組")
 st.markdown("""
 <div class="material-title">📘 **本章目標與工程用途**</div>
 
-
-本章主要目標：
+**本章主要目標**：
 - 了解常用工程分布（正態、對數正態、指數、Gamma、Poisson）的特性
 - 透過互動式操作調整分布參數，觀察 PDF、CDF、超越機率
 - 將統計分布應用於工程風險評估與設計
 
-工程用途示例：
+**工程用途示例**：
 - 水文設計：降雨量、洪峰流量
 - 結構設計：材料強度、載重分布
 - 土木工程風險評估：邊坡穩定、洪水概率
 """, unsafe_allow_html=True)
 
-st.markdown("""
-📚 **名詞定義與說明**
+<div class="material-title">📚 **名詞定義與說明**</div>
 - **PDF (Probability Density Function)**：連續型隨機變數的機率密度函數，用於描述特定值附近的相對可能性。
 - **CDF (Cumulative Distribution Function)**：累積機率函數，表示隨機變數 ≤ 某值的機率。
 - **超越機率 (Exceedance Probability)**：事件大於某臨界值的機率，例如洪水超過設計水位的機率。
 - **λ (rate / mean)**：指數分布或 Poisson 分布的參數，決定事件發生頻率。
 - **μ, σ**：平均值與標準差，用於正態分布描述資料中心與散布。
-""")
+""", unsafe_allow_html=True)
 
 st.markdown("---")
 st.markdown("### 📌 以下開始互動式操作")
