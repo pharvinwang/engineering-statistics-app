@@ -4,6 +4,40 @@ import numpy as np
 import matplotlib.pyplot as plt
 from io import StringIO
 import scipy.stats as stats
+# ============================================
+# Material UI Style Injection
+# ============================================
+st.markdown("""
+<style>
+.material-card {
+    background-color: var(--background-color);
+    padding: 1.6rem;
+    border-radius: 12px;
+    border: 1px solid var(--primary-color);
+    box-shadow: 0 4px 10px var(--shadow-color);
+    margin-bottom: 1.5rem;
+}
+.material-title {
+    font-size: 1.6rem; 
+    font-weight: 700; 
+    color: var(--primary-color);
+    margin-bottom: 0.3rem;
+}
+.material-text {
+    font-size: 1.05rem; 
+    line-height: 1.6;
+    color: var(--text-color);
+}
+.material-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+</style>
+""", unsafe_allow_html=True)
 
 # ===================================
 # 標題與 CSS
