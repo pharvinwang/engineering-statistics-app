@@ -5,51 +5,47 @@ import matplotlib.pyplot as plt
 from io import StringIO
 import scipy.stats as stats
 
-# ============================================
+# ===================================
 # 標題
-# ============================================
+# ===================================
 st.title("📊 描述統計與資料探索")
 
-# ============================================
+# ===================================
 # Step 1：本章目標與工程用途
-# ============================================
+# ===================================
+st.markdown("## 🎯 本章目標與工程用途")
 st.markdown("""
-<div class="material-card">
-<div class="material-title">🎯 本章目標與工程用途</div>
-<div class="material-text">
-本章主要目標：
-- 了解工程資料的分布、平均值、變異及離散程度
-- 發現資料中的異常值，為工程決策提供依據
+本章主要目標：  
+- 了解工程資料的分布、平均值、變異及離散程度  
+- 發現資料中的異常值，為工程決策提供依據  
 
 工程用途示例：
 - 混凝土試體強度的品質管制
 - 土壤含水量一致性檢測
 - 降雨量統計與水土保持設計
-</div>
-</div>
-""", unsafe_allow_html=True)
+""")
 
-# ============================================
+# ===================================
 # Step 2：名詞定義
-# ============================================
+# ===================================
+st.markdown("### 📚 名詞定義與說明")
 st.markdown("""
-<div class="material-card">
-<div class="material-title">📖 名詞定義</div>
-<div class="material-text">
 - **平均值 (Mean)**：資料的集中趨勢  
 - **樣本標準差 (s)**：資料的離散程度  
 - **變異係數 (CV)**：標準差與平均值比率，用於比較不同量級的變異  
 - **IQR (Interquartile Range)**：上下四分位數距離，用於異常值偵測  
-- **異常值 (Outlier)**：明顯偏離其他觀測值的資料點
-</div>
-</div>
-""", unsafe_allow_html=True)
+- **異常值 (Outlier)**：明顯偏離其他觀測值的資料點  
 
-st.markdown("### 🧪 Step 3：互動式操作")
+> 註：名詞定義中也說明工程用途，例如 CV 可用於比較不同材料或試樣之變異。
+""")
 
-# ============================================
+st.markdown("---")  # 水平線，區隔名詞與互動操作
+
+# ===================================
 # Step 3：互動式操作
-# ============================================
+# ===================================
+st.markdown("### 🧪 互動式操作")
+
 uploaded = st.file_uploader("上傳 CSV (含 header)", type=["csv"])
 use_sample = st.checkbox("使用範例資料 (20 年年最大日雨量)", value=True)
 
@@ -83,7 +79,7 @@ else:
         st.stop()
     df = pd.read_csv(uploaded)
 
-st.write("### 資料預覽")
+st.write("#### 資料預覽")
 st.dataframe(df.head())
 
 numeric = df.select_dtypes(include=[np.number]).columns.tolist()
@@ -118,7 +114,7 @@ res = stats.probplot(data, dist="norm", plot=axes[2])
 axes[2].set_title("QQ-plot")
 st.pyplot(fig)
 
-st.write("### 異常值列表")
+st.write("#### 異常值列表")
 if out_mask.any():
     out_df = df.loc[out_mask.index[out_mask], df.columns]
     st.dataframe(out_df)
